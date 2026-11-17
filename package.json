@@ -1,0 +1,20 @@
+{
+  "name": "work3",
+  "description": "Your one-stop solution to manage worktrees in your agentic projects",
+  "module": "src/cli.ts",
+  "type": "module",
+  "private": true,
+  "bin": {
+    "work3": "src/cli.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^7"
+  },
+  "dependencies": {
+    "@crustjs/core": "^0.6.1",
+    "@crustjs/extensions": "^0.6.1"
+  }
+}
