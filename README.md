@@ -17,7 +17,7 @@
 
 Your one-stop solution to manage worktrees in your agentic projects. Two agents in the same checkout overwrite each other's files. Plain `git worktree` fixes that, then leaves you reinstalling dependencies, copying `.env` files, inventing folder names and cleaning up stale trees by hand, for every branch, every day. work3 turns all of it into one command, configured once per repository and shared with your whole team.
 
-**Before**
+**The old way**
 
 ```shell
 git worktree add -b feat/login worktrees/feat--login main
@@ -27,7 +27,7 @@ cp ../../.env .env
 claude --remote-control my-app/feat/login
 ```
 
-**After**
+**🚀 With work3**
 
 ```shell
 work3 open feat/login
@@ -112,13 +112,7 @@ work3 refuses to remove the worktree you are currently in, and refuses dirty wor
 
 ## Configuration
 
-work3 reads its config from the root of the main checkout, looking for these files in order and using the first one found:
-
-1. `worktree.json`
-2. `worktree.yaml`
-3. `worktree.yml`
-
-If more than one exists, work3 warns and uses the first. Commit the config so the whole team shares the same setup. Unknown keys are rejected, so typos fail loudly.
+work3 reads its config from the root of the main checkout, looking for `worktree.json`, `worktree.yaml` or `worktree.yml`. If more than one exists, work3 warns and uses the first. Commit the config so the whole team shares the same augmented workflow.
 
 ```json
 {
@@ -160,7 +154,6 @@ Worktree folders are named after the branch with `/` and `\` replaced by `--`, s
 ## Good to know
 
 - work3 never fetches. `base: "main"` means your local `main`, use `--from origin/main` for the remote one.
-- A CLI cannot change the directory of the shell that ran it, so after Claude exits you are back where you started.
 - Tools in the main checkout (tsc, eslint, test runners, IDE indexers) may scan `worktrees/`. Exclude it in their configs if they do, or move `location` outside the repository, for example `"../my-project.worktrees"`.
 
 ## Development
@@ -169,3 +162,9 @@ Worktree folders are named after the branch with `/` and `\` replaced by `--`, s
 bun test
 bunx tsc --noEmit
 ```
+
+## Todo
+
+- Spawn new agents from Claude
+- Make it a NPM package
+- Make it harness agnostic
