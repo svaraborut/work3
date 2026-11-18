@@ -6,5 +6,5 @@ Your one-stop solution to manage worktrees in your agentic projects.
 
 ```shell
 bun link
-web3 ...
+work3 ...
 ```

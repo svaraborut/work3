@@ -124,12 +124,12 @@ src/
 
 ## TODO
 
-- [ ] Config module (schema, lookup, load) with tests
+- [x] Config module (schema, lookup, load) with tests
 - [ ] Git wrappers and repo root resolution
 - [ ] `init` command
 - [ ] `open` / `create` command with task runner and claude launch
 - [ ] `list` command
 - [ ] `remove` command
 - [ ] Integration test in temp repo
-- [ ] Cleanup: drop `index.ts`, fix `web3` typo in README
+- [x] Cleanup: drop `index.ts`, fix `web3` typo in README
 - [ ] Task kinds: pg, s3, domain
