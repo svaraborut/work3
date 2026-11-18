@@ -5,7 +5,7 @@ CLI to create, open, list and remove git worktrees with per-repo setup tasks, op
 ## Stack
 
 - Runtime: Bun only (`engines.bun >=1.2.21`, `#!/usr/bin/env bun` shebang)
-- Distribution: npm package `work3`, MIT; `bun run build` bundles `src/cli.ts` into `dist/cli.js` (the `bin`), only `dist` is published, so all libraries are devDependencies; `prepublishOnly` runs typecheck, tests and build
+- Distribution: npm package `@svara/work3` (unscoped name taken, `publishConfig.access: public`), command stays `work3` via `bin`, MIT; `bun run build` bundles `src/cli.ts` into `dist/cli.js` (the `bin`), only `dist` is published, so all libraries are devDependencies; `prepublishOnly` runs typecheck, tests and build
 - CLI framework: `@crustjs/core` + `@crustjs/extensions` (help, version, didYouMean)
 - Validation: Zod (strict schema, `z.strictObject`)
 - YAML: `Bun.YAML.parse` (no extra dependency)

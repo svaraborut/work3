@@ -1,6 +1,6 @@
 {
-  "name": "work3",
-  "version": "0.1.0",
+  "name": "@svara/work3",
+  "version": "0.0.0",
   "description": "Run a fleet of Claude Code agents in parallel, each on its own branch, in its own fully set up git worktree",
   "keywords": [
     "git",
@@ -40,6 +40,9 @@
     "test": "bun test",
     "typecheck": "tsc --noEmit",
     "prepublishOnly": "bun run typecheck && bun test && bun run build"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "devDependencies": {
     "@crustjs/core": "^0.6.1",
