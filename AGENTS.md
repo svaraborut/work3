@@ -6,6 +6,7 @@ CLI to create, open, list and remove git worktrees with per-repo setup tasks, op
 
 - Runtime: Bun only (`engines.bun >=1.2.21`, `#!/usr/bin/env bun` shebang)
 - Distribution: npm package `@svara/work3` (unscoped name taken, `publishConfig.access: public`), command stays `work3` via `bin`, MIT; `bun run build` bundles `src/cli.ts` into `dist/cli.js` (the `bin`), only `dist` is published, so all libraries are devDependencies; `prepublishOnly` runs typecheck, tests and build
+- Release: `.github/workflows/publish.yml` with `svaraborut/semver@v1` derives the version from Conventional Commits and git tags (`minimum-bump: minor`), injects it into `package.json` (committed value is a `0.0.0` placeholder); push to `main` tags `vX.Y.Z`, publishes npm `latest` and creates a GitHub release with the semver changelog, push to `stage` publishes `X.Y.Z-rcN` on npm `rc` without git tags; auth via `NPM_TOKEN` secret, with provenance
 - CLI framework: `@crustjs/core` + `@crustjs/extensions` (help, version, didYouMean)
 - Validation: Zod (strict schema, `z.strictObject`)
 - YAML: `Bun.YAML.parse` (no extra dependency)

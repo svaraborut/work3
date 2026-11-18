@@ -1,0 +1,69 @@
+name: Publish
+
+on:
+  push:
+    branches: [main, stage]
+
+concurrency:
+  group: publish-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # push release tags
+      id-token: write # npm provenance
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # semver needs the full history and tags
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+
+      - run: bun install --frozen-lockfile
+
+      # main releases and tags vX.Y.Z, stage only computes X.Y.Z-rcN without pushing tags.
+      - id: semver
+        uses: svaraborut/semver@v1
+        with:
+          files: package.json
+          preview: ${{ github.ref_name != 'main' }}
+          minimum-bump: minor
+
+      # prepublishOnly runs typecheck, tests and build before upload.
+      - name: Publish
+        run: npm publish --provenance --tag ${{ steps.semver.outputs.prerelease == 'true' && 'rc' || 'latest' }}
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - id: pkg
+        if: steps.semver.outputs.prerelease == 'false'
+        run: echo "name=$(node -p 'require("./package.json").name')" >> "$GITHUB_OUTPUT"
+
+      - name: GitHub release
+        if: steps.semver.outputs.prerelease == 'false'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.semver.outputs.tag }}
+          name: ${{ steps.semver.outputs.tag }}
+          make_latest: true
+          body: |
+            ## 📦 ${{ steps.pkg.outputs.name }}@${{ steps.semver.outputs.version }}
+
+            Published to npm: [${{ steps.pkg.outputs.name }}@${{ steps.semver.outputs.version }}](https://www.npmjs.com/package/${{ steps.pkg.outputs.name }}/v/${{ steps.semver.outputs.version }})
+
+            ```shell
+            bun add -g ${{ steps.pkg.outputs.name }}@${{ steps.semver.outputs.version }}
+            ```
+
+            ## Changes
+
+            ${{ steps.semver.outputs.changelog }}

@@ -187,6 +187,8 @@ bun test
 bun run typecheck
 ```
 
+Releases are automatic and follow [Conventional Commits](https://www.conventionalcommits.org): `!` or `BREAKING CHANGE:` bumps the major, anything else the minor. Pushing to `main` tags `vX.Y.Z`, publishes to npm as `latest` and creates a GitHub release with the changelog, pushing to `stage` publishes a `X.Y.Z-rcN` release candidate under the `rc` tag (`bun add -g @svara/work3@rc`).
+
 ## Todo
 
 - Spawn new agents from Claude
