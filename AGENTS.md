@@ -61,6 +61,9 @@ const Config = z.strictObject({
 
 - Worktree exists: skip creation and tasks.
 - Branch exists, no worktree: `git worktree add <dir> <branch>` (base ignored).
+- Branch name is validated with `git check-ref-format --branch`.
+- Target dir registered on another branch, or existing but not a worktree: fail.
+- Branch exists, `--from` given: warn that it is ignored.
 - Branch missing: `git worktree add -b <branch> <dir> <ref>` where ref = `--from` > config `base`.
 - Missing base ref: fail with `base '<ref>' not found, set base in worktree config or pass --from`.
 - After creation, run `initialize` tasks; on failure stop, keep the worktree, report the failing task, do not launch claude.
@@ -128,7 +131,7 @@ src/
 - [x] Config module (schema, lookup, load) with tests
 - [x] Git wrappers and repo root resolution
 - [x] `init` command
-- [ ] `open` / `create` command with task runner and claude launch
+- [x] `open` / `create` command with task runner and claude launch
 - [ ] `list` command
 - [ ] `remove` command
 - [ ] Integration test in temp repo
