@@ -2,20 +2,11 @@
 import { Crust } from '@crustjs/core'
 import { didYouMean, help, version } from '@crustjs/extensions'
 import pkg from '../package.json' with { type: 'json' }
+import { initCommand } from './commands/init.ts'
 
-await new Crust('work3')
+await new Crust('work3', { description: pkg.description })
   .extend(help())
   .extend(version((pkg as any).version))
   .extend(didYouMean())
-  .args(
-    {
-      name: 'name',
-      type: 'string',
-      description: 'Your name',
-      required: true,
-    }
-  )
-  .action(async ({ args }) => {
-    console.log(`Hello ${args.name} 👋🏼`)
-  })
+  .add(initCommand)
   .execute()

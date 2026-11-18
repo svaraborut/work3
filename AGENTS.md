@@ -16,7 +16,7 @@ CLI to create, open, list and remove git worktrees with per-repo setup tasks, op
 ### Principles
 
 - Git is the only source of truth: no work3 state file, worktrees are discovered via `git worktree list --porcelain`.
-- Repo root is always the main checkout, resolved via `git rev-parse --git-common-dir` (parent dir), so every command works from inside any worktree.
+- Repo root is always the main checkout, resolved as the first entry of `git worktree list --porcelain` (also correct for submodules, unlike the parent of `--git-common-dir`), so every command works from inside any worktree. Bare repos are rejected.
 - No implicit `git fetch`; refs are used as they exist locally.
 
 ### Config
@@ -96,6 +96,7 @@ src/
   config.ts           # zod schema, lookup, load
   git.ts              # git wrappers over Bun.spawn
   tasks.ts            # bun shell task runner
+  worktree.ts         # naming and path helpers
   commands/
     init.ts
     open.ts
@@ -125,8 +126,8 @@ src/
 ## TODO
 
 - [x] Config module (schema, lookup, load) with tests
-- [ ] Git wrappers and repo root resolution
-- [ ] `init` command
+- [x] Git wrappers and repo root resolution
+- [x] `init` command
 - [ ] `open` / `create` command with task runner and claude launch
 - [ ] `list` command
 - [ ] `remove` command
