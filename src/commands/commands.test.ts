@@ -3,6 +3,7 @@ import { existsSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileS
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { branchExists, git } from '../git.ts'
+import { foldWorktree } from './fold.ts'
 import { initRepo } from './init.ts'
 import { managedWorktrees } from './list.ts'
 import { openWorktree } from './open.ts'
@@ -11,9 +12,9 @@ import { removeWorktree } from './remove.ts'
 let root: string
 const spies: { mockRestore(): void }[] = []
 
-async function commitAll(message: string): Promise<void> {
-  await git(['add', '-A'], root)
-  await git(['-c', 'user.name=work3', '-c', 'user.email=work3@example.com', 'commit', '-q', '-m', message], root)
+async function commitAll(message: string, cwd: string = root): Promise<void> {
+  await git(['add', '-A'], cwd)
+  await git(['-c', 'user.name=work3', '-c', 'user.email=work3@example.com', 'commit', '-q', '-m', message], cwd)
 }
 
 beforeEach(async () => {
@@ -67,5 +68,57 @@ describe('worktree lifecycle', () => {
     await openWorktree(root, 'again', { claude: false })
     await openWorktree(root, 'again', { claude: false })
     expect(readFileSync(join(root, 'worktrees', 'again', 'count.txt'), 'utf8').trim()).toBe('x')
+  })
+})
+
+describe('fold', () => {
+  const noFlags = { remove: false, force: false, deleteBranch: false }
+  let dir: string
+
+  beforeEach(async () => {
+    writeFileSync(join(root, 'worktree.json'), '{}')
+    await commitAll('config')
+    await openWorktree(root, 'feat/f', { claude: false })
+    dir = join(root, 'worktrees', 'feat--f')
+    writeFileSync(join(dir, 'feature.txt'), 'hello')
+    await commitAll('feature', dir)
+  })
+
+  test('fast-forwards the checked out target and updates its files', async () => {
+    await foldWorktree(root, 'feat/f', noFlags)
+    expect(readFileSync(join(root, 'feature.txt'), 'utf8')).toBe('hello')
+    expect(existsSync(dir)).toBe(true)
+  })
+
+  test('fast-forwards a target that is not checked out', async () => {
+    await git(['branch', 'release'], root)
+    await foldWorktree(root, 'feat/f', { ...noFlags, into: 'release' })
+    expect(await git(['rev-parse', 'release'], root)).toBe(await git(['rev-parse', 'feat/f'], root))
+  })
+
+  test('refuses a diverged branch', async () => {
+    writeFileSync(join(root, 'other.txt'), 'x')
+    await commitAll('diverge')
+    await expect(foldWorktree(root, 'feat/f', noFlags)).rejects.toThrow(/not a fast-forward/)
+  })
+
+  test('refuses a dirty worktree', async () => {
+    writeFileSync(join(dir, 'wip.txt'), 'x')
+    await expect(foldWorktree(root, 'feat/f', noFlags)).rejects.toThrow(/commit them before folding/)
+  })
+
+  test('refuses removal flags without --remove', async () => {
+    await expect(foldWorktree(root, 'feat/f', { ...noFlags, deleteBranch: true })).rejects.toThrow(/require --remove/)
+  })
+
+  test('refuses folding the target into itself', async () => {
+    await expect(foldWorktree(root, 'main', noFlags)).rejects.toThrow(/into itself/)
+  })
+
+  test('folds, removes the worktree and deletes the branch', async () => {
+    await foldWorktree(root, 'feat/f', { remove: true, force: false, deleteBranch: true })
+    expect(existsSync(dir)).toBe(false)
+    expect(await branchExists('feat/f', root)).toBe(false)
+    expect(readFileSync(join(root, 'feature.txt'), 'utf8')).toBe('hello')
   })
 })

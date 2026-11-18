@@ -83,6 +83,16 @@ export async function refExists(ref: string, cwd: string): Promise<boolean> {
   return (await gitRaw(['rev-parse', '--verify', '--quiet', `${ref}^{commit}`], cwd)).code === 0
 }
 
+export async function isAncestor(ancestor: string, ref: string, cwd: string): Promise<boolean> {
+  const result = await gitRaw(['merge-base', '--is-ancestor', ancestor, ref], cwd)
+  if (result.code > 1) throw new Error(`git merge-base failed: ${result.stderr}`)
+  return result.code === 0
+}
+
+export async function shortSha(ref: string, cwd: string): Promise<string> {
+  return git(['rev-parse', '--short', ref], cwd)
+}
+
 export async function currentBranch(cwd: string): Promise<string> {
   return (await gitRaw(['branch', '--show-current'], cwd)).stdout
 }

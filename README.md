@@ -60,7 +60,8 @@ cd my-project
 work3 init               # writes worktree.json and ignores /worktrees/
 work3 open feat/login    # create, set up and start claude
 work3 ls                 # see all worktrees and their status
-work3 rm feat/login -d   # run destroy tasks, remove worktree and branch
+work3 fold feat/login -rd  # fast-forward main, remove worktree and branch
+work3 rm feat/login -d   # or discard: run destroy tasks, remove worktree and branch
 ```
 
 ## Commands
@@ -109,6 +110,23 @@ Alias: `rm`. Runs `destroy` tasks, then removes the worktree.
 | `-d, --delete-branch` | Also delete the branch (kept by default) |
 
 work3 refuses to remove the worktree you are currently in, and refuses dirty worktrees before any destroy task runs.
+
+### `work3 fold <branch> [--into <ref>] [-r] [-f] [-d]`
+
+Lands a finished branch on `base` by fast-forward only: no merge commits, no rebases, no pushes.
+
+- Refuses if the worktree has uncommitted or untracked changes, so no work is left behind.
+- Refuses if the branch is not a fast-forward of the target, and tells you to rebase it inside the worktree.
+- If the target is checked out (usually in the main checkout), its files are updated too.
+
+| Flag | Description |
+|---|---|
+| `--into <ref>` | Target branch, overrides `base` |
+| `-r, --remove` | Remove the worktree after folding, same as `work3 remove` |
+| `-f, --force` | With `-r`: continue past failing destroy tasks |
+| `-d, --delete-branch` | With `-r`: also delete the folded branch |
+
+If removal fails after a successful fold, the fold is kept and `work3 rm <branch>` retries the cleanup.
 
 ## Configuration
 

@@ -87,6 +87,26 @@ const Config = z.strictObject({
 - `--force` skips failing tasks, passes `--force` to `git worktree remove`, uses `git branch -D`.
 - Branch is kept by default.
 
+#### `work3 fold <branch> [--into <ref>] [--remove] [--force] [--delete-branch]`
+
+- Fast-forwards the target onto the branch; never merges, rebases or pushes.
+- Target = `--into` > config `base`; must be a local branch.
+- Short flags `-r`, `-f`, `-d`; `--force` and `--delete-branch` require `--remove` (error otherwise) and mean the same as in `remove`.
+- Checks, in order, before touching anything:
+  - `--force` / `--delete-branch` without `--remove`
+  - branch equals target: `cannot fold <target> into itself`
+  - no managed worktree for the branch, or its dir is missing
+  - `--remove` with cwd inside the target worktree
+  - target missing: `target '<ref>' not found, set base in worktree config or pass --into`
+  - dirty worktree (no override): `commit them before folding`
+  - not a fast-forward (`git merge-base --is-ancestor <target> <branch>`): suggest `git rebase <target>` in the worktree
+- Ref update:
+  - target checked out in a worktree (usually the main checkout): `git merge --ff-only <branch>` there, so its files follow; git refuses if local changes would be overwritten
+  - otherwise: `git fetch . refs/heads/<branch>:refs/heads/<target>`
+- Branch equal to target commit: print `already up to date`, continue.
+- Output: `Folded <branch> into <target> (<old>..<new>)` with short SHAs.
+- `--remove` then calls `removeWorktree()`; if removal fails the fold is kept and the error says `run work3 rm <branch> to retry`.
+
 ### Tasks
 
 - Run sequentially via Bun Shell (cross-platform builtins: `cp`, `rm`, `mkdir`, `echo`, ...), raw command string.
@@ -108,6 +128,7 @@ src/
     open.ts
     list.ts
     remove.ts
+    fold.ts
 ```
 
 ### Tests
@@ -115,6 +136,7 @@ src/
 - Config parsing, defaults, strict errors, lookup order and multi-file warning.
 - Safe-name mapping.
 - Integration: temp git repo, `open --no-claude` runs initialize, `remove` runs destroy and removes the worktree.
+- Integration: `fold` updates the checked-out target's files, refuses diverged and dirty branches and orphan `-f`/`-d`, `fold -r -d` removes worktree and branch.
 
 ### Known limitations
 
@@ -139,4 +161,5 @@ src/
 - [x] `remove` command
 - [x] Integration test in temp repo
 - [x] Cleanup: drop `index.ts`, fix `web3` typo in README
+- [x] `fold` command
 - [ ] Task kinds: pg, s3, domain
