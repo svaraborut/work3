@@ -137,6 +137,6 @@ src/
 - [x] `open` / `create` command with task runner and claude launch
 - [x] `list` command
 - [x] `remove` command
-- [ ] Integration test in temp repo
+- [x] Integration test in temp repo
 - [x] Cleanup: drop `index.ts`, fix `web3` typo in README
 - [ ] Task kinds: pg, s3, domain
