@@ -8,6 +8,8 @@
 [![Bun](https://img.shields.io/badge/runtime-Bun-f9f1e1?logo=bun&logoColor=black)](https://bun.sh)
 [![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-Remote%20Control-d97757?logo=claude&logoColor=white)](https://claude.com/claude-code)
+[![npm](https://img.shields.io/npm/v/work3?logo=npm)](https://www.npmjs.com/package/work3)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
 
 <img src="docs/hero.png" alt="Six Claude Code sessions running side by side, each in its own work3 worktree" width="100%">
 
@@ -47,11 +49,11 @@ work3 open feat/login
 Requires [Bun](https://bun.sh) 1.2.21 or newer, git, and [Claude Code](https://claude.com/claude-code) on your `PATH` (unless you always pass `--no-claude`).
 
 ```shell
-git clone <this repo> && cd work3
-bun install
-bun link
-work3 ...
+bun add -g work3
+work3 --help
 ```
+
+Or run it without installing: `bunx work3 open feat/login`.
 
 ## Quick start
 
@@ -177,12 +179,19 @@ Worktree folders are named after the branch with `/` and `\` replaced by `--`, s
 ## Development
 
 ```shell
+git clone https://github.com/svaraborut/work3.git && cd work3
+bun install
+bun run build && bun link   # puts your local build on PATH as work3
+bun run dev -- --help       # run from source without building
 bun test
-bunx tsc --noEmit
+bun run typecheck
 ```
 
 ## Todo
 
 - Spawn new agents from Claude
-- Make it a NPM package
 - Make it harness agnostic
+
+## License
+
+[MIT](LICENSE) © Borut Svara

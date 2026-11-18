@@ -1,21 +1,51 @@
 {
   "name": "work3",
-  "description": "Your one-stop solution to manage worktrees in your agentic projects",
-  "module": "src/cli.ts",
+  "version": "0.1.0",
+  "description": "Run a fleet of Claude Code agents in parallel, each on its own branch, in its own fully set up git worktree",
+  "keywords": [
+    "git",
+    "worktree",
+    "git-worktree",
+    "claude",
+    "claude-code",
+    "ai-agents",
+    "agentic",
+    "parallel",
+    "cli",
+    "bun"
+  ],
+  "homepage": "https://github.com/svaraborut/work3#readme",
+  "bugs": {
+    "url": "https://github.com/svaraborut/work3/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/svaraborut/work3.git"
+  },
+  "license": "MIT",
+  "author": "Borut Svara <borut@svara.io>",
   "type": "module",
-  "private": true,
   "bin": {
-    "work3": "src/cli.ts"
+    "work3": "dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "engines": {
+    "bun": ">=1.2.21"
+  },
+  "scripts": {
+    "build": "bun build src/cli.ts --target bun --outdir dist",
+    "dev": "bun src/cli.ts",
+    "test": "bun test",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "bun run typecheck && bun test && bun run build"
   },
   "devDependencies": {
-    "@types/bun": "latest"
-  },
-  "peerDependencies": {
-    "typescript": "^7"
-  },
-  "dependencies": {
     "@crustjs/core": "^0.6.1",
     "@crustjs/extensions": "^0.6.1",
+    "@types/bun": "^1.4.4",
+    "typescript": "^7.0.2",
     "zod": "^4.6.7"
   }
 }

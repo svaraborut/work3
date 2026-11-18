@@ -10,7 +10,7 @@ import { removeCommand } from './commands/remove.ts'
 
 await new Crust('work3', { description: pkg.description })
   .extend(help())
-  .extend(version((pkg as any).version))
+  .extend(version(pkg.version))
   .extend(didYouMean())
   .add(initCommand, openCommand, listCommand, removeCommand, foldCommand)
   .execute()

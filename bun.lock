@@ -4,16 +4,12 @@
   "workspaces": {
     "": {
       "name": "work3",
-      "dependencies": {
+      "devDependencies": {
         "@crustjs/core": "^0.6.1",
         "@crustjs/extensions": "^0.6.1",
+        "@types/bun": "^1.4.4",
+        "typescript": "^7.0.2",
         "zod": "^4.6.7",
-      },
-      "devDependencies": {
-        "@types/bun": "latest",
-      },
-      "peerDependencies": {
-        "typescript": "^7",
       },
     },
   },
