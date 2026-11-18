@@ -72,15 +72,18 @@ const Config = z.strictObject({
 
 #### `work3 list`
 
-- Show worktrees under `location`: branch, path, dirty marker (`git status --porcelain`).
+- Alias `ls`.
+- Show worktrees under `location`: branch, status (`clean`, `dirty` via `git status --porcelain`, or `missing` when the dir is gone), path relative to root.
 - todo: `--json` output for scripting
 
 #### `work3 remove <branch> [--force] [--delete-branch]`
 
 - Refuse when the current working directory is inside the target worktree (Windows locks it).
+- Alias `rm`; short flags `-f` and `-d`.
+- Dirty worktree (`git status --porcelain`, untracked included) is refused before any destroy task runs, unless `--force`, so a refused removal never leaves resources half torn down.
 - Order: run `destroy` tasks -> `git worktree remove` -> optional `git branch -d`.
 - Task failure stops removal unless `--force`.
-- Dirty worktree is refused by git unless `--force`.
+- Missing worktree dir: skip destroy tasks with a warning, still deregister it.
 - `--force` skips failing tasks, passes `--force` to `git worktree remove`, uses `git branch -D`.
 - Branch is kept by default.
 
@@ -132,8 +135,8 @@ src/
 - [x] Git wrappers and repo root resolution
 - [x] `init` command
 - [x] `open` / `create` command with task runner and claude launch
-- [ ] `list` command
-- [ ] `remove` command
+- [x] `list` command
+- [x] `remove` command
 - [ ] Integration test in temp repo
 - [x] Cleanup: drop `index.ts`, fix `web3` typo in README
 - [ ] Task kinds: pg, s3, domain
