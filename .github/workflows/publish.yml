@@ -32,11 +32,12 @@ jobs:
 
       # main releases and tags vX.Y.Z, stage only computes X.Y.Z-rcN without pushing tags.
       - id: semver
-        uses: svaraborut/semver@v1
+        uses: svaraborut/semver@v2
         with:
           files: package.json
           preview: ${{ github.ref_name != 'main' }}
           minimum-bump: minor
+          aliases: ''  # disable aliases
 
       # prepublishOnly runs typecheck, tests and build before upload.
       - name: Publish
