@@ -104,3 +104,14 @@ export async function isIgnored(path: string, cwd: string): Promise<boolean> {
 export async function isDirty(cwd: string): Promise<boolean> {
   return (await git(['status', '--porcelain'], cwd)) !== ''
 }
+
+// Paths of symlinks committed to the index (mode 120000), relative to cwd with forward slashes.
+export async function trackedLinks(cwd: string): Promise<Set<string>> {
+  const out = await git(['ls-files', '-s', '-z'], cwd)
+  const links = new Set<string>()
+  for (const entry of out.split('\0')) {
+    const [meta, path] = entry.split('\t')
+    if (path && meta?.startsWith('120000 ')) links.add(path)
+  }
+  return links
+}

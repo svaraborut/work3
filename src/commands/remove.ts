@@ -1,9 +1,9 @@
 import { defineCommand } from '@crustjs/core'
 import { existsSync } from 'node:fs'
 import { loadConfig } from '../config.ts'
-import { gitInherit, isDirty, listWorktrees, repoRoot } from '../git.ts'
+import { gitInherit, isDirty, listWorktrees, repoRoot, trackedLinks } from '../git.ts'
 import { runTasks } from '../tasks.ts'
-import { isInside, samePath, worktreePath } from '../worktree.ts'
+import { isInside, samePath, unlinkLinks, worktreePath } from '../worktree.ts'
 
 export interface RemoveOptions {
   force: boolean
@@ -25,6 +25,8 @@ export async function removeWorktree(cwd: string, branch: string, options: Remov
       throw new Error(`${dir} has uncommitted or untracked changes, use --force to remove anyway`)
     }
     await runTasks(config.destroy, { root, path: dir, branch }, { continueOnError: options.force })
+    // Tracked links are left to git, unlinking them would make the worktree dirty and fail the removal.
+    for (const link of unlinkLinks(dir, await trackedLinks(dir))) console.log(`Unlinked ${link}`)
   } else {
     console.warn(`warning: ${dir} is missing, skipping destroy tasks`)
   }

@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, spyOn, test } from 'bun:test'
-import { existsSync, mkdtempSync, readFileSync, realpathSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdtempSync, readFileSync, realpathSync, rmSync, symlinkSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { branchExists, git } from '../git.ts'
@@ -53,6 +53,25 @@ describe('worktree lifecycle', () => {
     expect(existsSync(dir)).toBe(false)
     expect(readFileSync(join(root, 'destroyed.txt'), 'utf8').trim()).toBe('feat/a')
     expect(await branchExists('feat/a', root)).toBe(false)
+  })
+
+  test('remove unlinks junctions without deleting their targets', async () => {
+    const shared = realpathSync(mkdtempSync(join(tmpdir(), 'work3-shared-')))
+    try {
+      writeFileSync(join(shared, 'precious.txt'), 'keep')
+      writeFileSync(join(root, 'worktree.json'), '{}')
+      writeFileSync(join(root, '.gitignore'), '/worktrees/\nshared\n')
+      await commitAll('config')
+      const dir = join(root, 'worktrees', 'linked')
+      await openWorktree(root, 'linked', { claude: false })
+      symlinkSync(shared, join(dir, 'shared'), 'junction')
+
+      await removeWorktree(root, 'linked', { force: false, deleteBranch: false })
+      expect(existsSync(dir)).toBe(false)
+      expect(readFileSync(join(shared, 'precious.txt'), 'utf8')).toBe('keep')
+    } finally {
+      rmSync(shared, { recursive: true, force: true })
+    }
   })
 
   test('failing initialize keeps the worktree', async () => {

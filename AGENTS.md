@@ -83,7 +83,8 @@ const Config = z.strictObject({
 - Refuse when the current working directory is inside the target worktree (Windows locks it).
 - Alias `rm`; short flags `-f` and `-d`.
 - Dirty worktree (`git status --porcelain`, untracked included) is refused before any destroy task runs, unless `--force`, so a refused removal never leaves resources half torn down.
-- Order: run `destroy` tasks -> `git worktree remove` -> optional `git branch -d`.
+- Order: run `destroy` tasks -> unlink links -> `git worktree remove` -> optional `git branch -d`.
+- Unlink links: every symlink and junction in the worktree not tracked by git (mode `120000`) is unlinked without following it and logged, because `git worktree remove` follows junctions on Windows and deletes their targets' content. Tracked links stay with git so a clean worktree stays clean.
 - Task failure stops removal unless `--force`.
 - Missing worktree dir: skip destroy tasks with a warning, still deregister it.
 - `--force` skips failing tasks, passes `--force` to `git worktree remove`, uses `git branch -D`.
@@ -138,6 +139,7 @@ src/
 - Config parsing, defaults, strict errors, lookup order and multi-file warning.
 - Safe-name mapping.
 - Integration: temp git repo, `open --no-claude` runs initialize, `remove` runs destroy and removes the worktree.
+- Integration: `remove` unlinks an ignored junction and keeps its target's content.
 - Integration: `fold` updates the checked-out target's files, refuses diverged and dirty branches and orphan `-f`/`-d`, `fold -r -d` removes worktree and branch.
 
 ### Known limitations
