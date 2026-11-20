@@ -4,20 +4,19 @@
 
 **Run a fleet of Claude Code agents in parallel, each on its own branch, in its own fully set up worktree.**
 
-[![GitHub stars](https://img.shields.io/github/stars/svaraborut/work3?style=flat&logo=github)](https://github.com/svaraborut/work3/stargazers)
-[![Bun](https://img.shields.io/badge/runtime-Bun-f9f1e1?logo=bun&logoColor=black)](https://bun.sh)
-[![TypeScript](https://img.shields.io/badge/TypeScript-strict-3178c6?logo=typescript&logoColor=white)](https://www.typescriptlang.org)
-[![Claude Code](https://img.shields.io/badge/Claude%20Code-Remote%20Control-d97757?logo=claude&logoColor=white)](https://claude.com/claude-code)
-[![npm](https://img.shields.io/npm/v/@svara/work3?logo=npm)](https://www.npmjs.com/package/@svara/work3)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/svaraborut/work3?style=for-the-badge&logo=github&logoColor=white&label=stars&labelColor=18181b&color=3f3f46)](https://github.com/svaraborut/work3/stargazers)
+[![Claude Code](https://img.shields.io/badge/remote%20control-d97757?style=for-the-badge&logo=claude&logoColor=white&label=claude%20code&labelColor=18181b)](https://claude.com/claude-code)
+[![npm](https://img.shields.io/npm/v/@svara/work3?style=for-the-badge&logo=npm&logoColor=white&label=npm&labelColor=18181b&color=cb3837)](https://www.npmjs.com/package/@svara/work3)
+[![License: MIT](https://img.shields.io/github/license/svaraborut/work3?style=for-the-badge&label=license&labelColor=18181b&color=3f3f46)](https://github.com/svaraborut/work3/blob/main/LICENSE)
 
-<img src="docs/hero.png" alt="Six Claude Code sessions running side by side, each in its own work3 worktree" width="100%">
-
-<sub>Six agents, six branches, zero collisions. One `work3 open` each.</sub>
+<picture>
+  <source srcset="https://raw.githubusercontent.com/svaraborut/work3/main/docs/animation.gif" type="image/gif">
+  <img src="https://raw.githubusercontent.com/svaraborut/work3/main/docs/hero.png" alt="Six Claude Code sessions running side by side, each in its own work3 worktree" width="100%">
+</picture>
 
 </div>
 
-Your one-stop solution to manage worktrees in your agentic projects. Two agents in the same checkout overwrite each other's files. Plain `git worktree` fixes that, then leaves you reinstalling dependencies, copying `.env` files, inventing folder names and cleaning up stale trees by hand, for every branch, every day. work3 turns all of it into one command, configured once per repository and shared with your whole team.
+Parallel agents need separate checkouts. `git worktree` gives you one, but each new worktree still needs dependencies installed, `.env` files copied, a folder name and, later, a cleanup. work3 does all of that in one command, from a config you commit once and share with your team.
 
 **The old way**
 
@@ -27,108 +26,89 @@ cd worktrees/feat--login
 bun ci
 cp ../../.env .env
 claude --remote-control my-app/feat/login
+cd ../..
+git merge --ff-only feat/login
+git worktree remove worktrees/feat--login
+git branch -d feat/login
 ```
 
 **🚀 With work3**
 
 ```shell
 work3 open feat/login
+work3 fold feat/login -rd
 ```
 
-## Why work3
+## Features
 
-- 🚀 **One command per branch** - `work3 open <branch>` creates the worktree, runs your setup and drops you into Claude Code, or reopens it if it already exists.
-- 📦 **Setup that lives in the repo** - `initialize` and `destroy` tasks in `worktree.json` install dependencies, copy secrets and clean up, the same for everyone on the team.
-- 📱 **Steer every agent from your phone** - each session starts with Claude Code Remote Control, named `<repo>/<branch>` so parallel sessions stay distinguishable.
-- 🖥️ **Cross-platform tasks** - commands run through Bun Shell, so `cp $WORK3_ROOT/.env .env` works on Windows, macOS and Linux alike.
-- 🛡️ **Safe teardown** - `work3 rm` refuses to delete uncommitted work and never runs destroy tasks on a worktree it will not remove.
-- 🧭 **No hidden state** - git is the only source of truth, and every command works from the main checkout or from inside any worktree.
+- 🚀 **One command per branch** - worktree, setup and Claude Code in one go
+- 📦 **Shared setup** - install and cleanup tasks committed with the repo
+- 📱 **Remote Control** - steer every agent from your phone
+- 🔀 **Linear history** - finished branches land fast-forward only
+- 🛡️ **Safe teardown** - uncommitted work is never deleted
+- 🖥️ **Cross-platform** - same tasks on Windows, macOS and Linux
+- 🧭 **No hidden state** - git is the only source of truth
 
 ## Install
 
-Requires [Bun](https://bun.sh) 1.2.21 or newer, git, and [Claude Code](https://claude.com/claude-code) on your `PATH` (unless you always pass `--no-claude`).
+Requires [Bun](https://bun.sh) 1.2.21 or newer, git, and [Claude Code](https://claude.com/claude-code) on your `PATH`.
 
 ```shell
 bun add -g @svara/work3
 work3 --help
 ```
 
-The package is scoped, the command is `work3`. Or run it without installing: `bunx @svara/work3 open feat/login`.
-
 ## Quick start
 
 ```shell
 cd my-project
-work3 init               # writes worktree.json and ignores /worktrees/
-work3 open feat/login    # create, set up and start claude
-work3 ls                 # see all worktrees and their status
-work3 fold feat/login -rd  # fast-forward main, remove worktree and branch
-work3 rm feat/login -d   # or discard: run destroy tasks, remove worktree and branch
+work3 init                   # writes worktree.json and ignores /worktrees/
+work3 open feat/login        # create, set up and start claude
+work3 ls                     # see all worktrees and their status
+work3 fold feat/login -rd    # fast-forward main, remove worktree and branch
+work3 rm feat/login -d       # or discard: run destroy tasks, remove worktree and branch
 ```
 
 ## Commands
 
-### `work3 init [--yaml]`
+### `work3 init`
 
-Creates the config in the root of the current repository.
+Sets up a repository for work3 in one step. It writes a `worktree.json` with sensible defaults that you commit and share with your team, and it never overwrites a config that already exists.
 
-- Writes `worktree.json`, or `worktree.yaml` with `--yaml`.
-- Sets `base` to `main` if that branch exists, otherwise to the current branch.
-- Adds `/worktrees/` to `.gitignore` unless it is already ignored.
-- Refuses to run if a config file already exists.
+- `--yaml` - write `worktree.yaml` instead
 
-### `work3 open <branch> [--from <ref>] [--no-claude]`
+### `work3 open <branch>`
 
-Alias: `create`. Creates the worktree if needed, then starts `claude --remote-control <repo>/<branch>` inside it.
+Takes you from a branch name to a running agent in a fully set up workspace. A new branch gets its own worktree, your setup tasks and a Claude Code session you can steer from your phone. A branch you have worked on before reopens exactly where you left it, with no setup to wait for.
 
-| Situation | Behaviour |
-|---|---|
-| Worktree already exists | Reopened as is, `initialize` tasks are not run again |
-| Branch exists, no worktree | Branch is checked out in a new worktree, `--from` is ignored |
-| Branch does not exist | Branch is created from `--from`, or from `base` in the config |
-
-| Flag | Description |
-|---|---|
-| `--from <ref>` | Base ref for a new branch, overrides `base` (for example `origin/main`) |
-| `--no-claude` | Skip launching Claude and print the worktree path instead |
-
-If an `initialize` task fails, work3 stops, keeps the worktree for inspection and does not start Claude.
+- `--from <ref>` - start a new branch from another ref, for example `origin/main`
+- `--no-claude` - set up the worktree without starting Claude and print its path
 
 ### `work3 list`
 
-Alias: `ls`. Lists worktrees under `location` with their branch, status and path.
+Shows every agent workspace at a glance: its branch, its folder, and whether it is `clean`, `dirty` with work not yet committed, or `missing` because its folder was deleted.
 
-- `clean` - no changes.
-- `dirty` - uncommitted or untracked files.
-- `missing` - registered in git but the folder is gone.
+### `work3 remove <branch>`
 
-### `work3 remove <branch> [-f] [-d]`
+Throws away a worktree you no longer need and runs your cleanup tasks. The branch is kept, so the commits stay available.
 
-Alias: `rm`. Runs `destroy` tasks, then removes the worktree.
+> [!TIP]
+> Uncommitted work is never lost by accident: a worktree with changes is refused before anything is touched.
 
-| Flag | Description |
-|---|---|
-| `-f, --force` | Remove even with uncommitted or untracked changes, continue past failing destroy tasks, force-delete the branch |
-| `-d, --delete-branch` | Also delete the branch (kept by default) |
+- `-d, --delete-branch` - delete the branch too
+- `-f, --force` - discard uncommitted changes and push through failing cleanup tasks
 
-work3 refuses to remove the worktree you are currently in, and refuses dirty worktrees before any destroy task runs.
+### `work3 fold <branch>`
 
-### `work3 fold <branch> [--into <ref>] [-r] [-f] [-d]`
+Lands a finished branch on `main` with a clean, linear history: fast-forward only, never a merge commit, rebase or push. The files in your main checkout move forward too, ready to test or push.
 
-Lands a finished branch on `base` by fast-forward only: no merge commits, no rebases, no pushes.
+> [!TIP] 
+> A branch with uncommitted work, or one that has fallen behind `main`, is refused with a hint to rebase it first. If cleanup fails after folding, your commits are still landed and `work3 rm <branch>` finishes the job.
 
-- Refuses if the worktree has uncommitted or untracked changes, so no work is left behind.
-- Refuses if the branch is not a fast-forward of the target, and tells you to rebase it inside the worktree.
-- If the target is checked out (usually in the main checkout), its files are updated too.
-
-| Flag | Description |
-|---|---|
-| `--into <ref>` | Target branch, overrides `base` |
-| `-r, --remove` | Remove the worktree after folding, same as `work3 remove` |
-| `-f, --force` | With `-r`: continue past failing destroy tasks |
-| `-d, --delete-branch` | With `-r`: also delete the folded branch |
-
-If removal fails after a successful fold, the fold is kept and `work3 rm <branch>` retries the cleanup.
+- `--into <ref>` - land on another branch instead of `base`
+- `-r, --remove` - remove the worktree once landed
+- `-d, --delete-branch` - with `-r`, delete the branch too
+- `-f, --force` - with `-r`, push through failing cleanup tasks
 
 ## Configuration
 
@@ -167,16 +147,7 @@ Tasks run one after another, inside the worktree folder, through [Bun Shell](htt
 | `WORK3_PATH` | Path of the worktree |
 | `WORK3_BRANCH` | Branch name |
 
-### Folder names
-
-Worktree folders are named after the branch with `/` and `\` replaced by `--`, so `feat/login` lives in `worktrees/feat--login`.
-
-## Good to know
-
-- work3 never fetches. `base: "main"` means your local `main`, use `--from origin/main` for the remote one.
-- Tools in the main checkout (tsc, eslint, test runners, IDE indexers) may scan `worktrees/`. Exclude it in their configs if they do, or move `location` outside the repository, for example `"../my-project.worktrees"`.
-
-## Development
+## Contributing
 
 ```shell
 git clone https://github.com/svaraborut/work3.git && cd work3
@@ -188,11 +159,6 @@ bun run typecheck
 ```
 
 Releases are automatic and follow [Conventional Commits](https://www.conventionalcommits.org): `!` or `BREAKING CHANGE:` bumps the major, anything else the minor. Pushing to `main` tags `vX.Y.Z`, publishes to npm as `latest` and creates a GitHub release with the changelog, pushing to `stage` publishes a `X.Y.Z-rcN` release candidate under the `rc` tag (`bun add -g @svara/work3@rc`).
-
-## Todo
-
-- Spawn new agents from Claude
-- Make it harness agnostic
 
 ## License
 
